@@ -10,6 +10,7 @@ headers = [
     "list.h",
     "md5.h",
     "ptrarray.h",
+    "stack.h",
     "str.h",
     "strfuncs.h",
 ]
@@ -20,6 +21,7 @@ sources = [
     "list.c",
     "md5.c",
     "ptrarray.c",
+    "stack.c",
     "str.c",
     "strfuncs.c",
 ]
