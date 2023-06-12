@@ -106,7 +106,7 @@ int cx_file_set_contents_str(const char *fn, const cx_str_t *contents)
   return cx_file_set_contents(fn, contents->data, contents->size);
 }
 
-int cx_file_read_lines(const char *fn, cx_ptrarray_t *lines)
+int cx_file_read_lines(const char *fn, cx_array_t *lines)
 {
   assert(fn);
   assert(lines);

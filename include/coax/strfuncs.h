@@ -5,7 +5,7 @@
 #error "Only <coax.h> can be included directly."
 #endif
 
-#include <coax/ptrarray.h>
+#include <coax/array.h>
 
 #include <stdarg.h>
 #include <stdbool.h>
@@ -27,8 +27,8 @@ bool cx_strnequal(const char *s1, const char *s2, size_t n);
 
 char *cx_strtok(char *str, const char *delim, char **saveptr);
 
-int cx_strsplit(const char *str, const char *delim, cx_ptrarray_t *result);
-int cx_strnsplit(const char *str, size_t len, const char *delim, cx_ptrarray_t *result);
+int cx_strsplit(const char *str, const char *delim, cx_array_t *result);
+int cx_strnsplit(const char *str, size_t len, const char *delim, cx_array_t *result);
 
 char *cx_strup(char *str);
 char *cx_strnup(char *str, long long int n);

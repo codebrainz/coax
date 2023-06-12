@@ -1,16 +1,16 @@
-#include <coax/ptrarray.h>
+#include <coax/array.h>
 
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
-int cx_ptrarray_init(cx_ptrarray_t *arr)
+int cx_array_init(cx_array_t *arr)
 {
   assert(arr);
-  return cx_ptrarray_init_full(arr, 0, NULL);
+  return cx_array_init_full(arr, 0, NULL);
 }
 
-int cx_ptrarray_init_full(cx_ptrarray_t *arr, size_t reserve, cx_free_func free)
+int cx_array_init_full(cx_array_t *arr, size_t reserve, cx_free_func free)
 {
   assert(arr);
 
@@ -18,31 +18,31 @@ int cx_ptrarray_init_full(cx_ptrarray_t *arr, size_t reserve, cx_free_func free)
   arr->size = arr->capacity = 0;
   arr->free = free;
 
-  if (reserve > 0 && cx_ptrarray_reserve(arr, reserve) != 0)
+  if (reserve > 0 && cx_array_reserve(arr, reserve) != 0)
     return -1;
 
   return 0;
 }
 
-int cx_ptrarray_cleanup(cx_ptrarray_t *arr)
+int cx_array_cleanup(cx_array_t *arr)
 {
   assert(arr);
-  cx_ptrarray_clear(arr);
+  cx_array_clear(arr);
   free(arr->items);
   return 0;
 }
 
-cx_ptrarray_t *cx_ptrarray_new(void)
+cx_array_t *cx_array_new(void)
 {
-  return cx_ptrarray_new_full(0, NULL);
+  return cx_array_new_full(0, NULL);
 }
 
-cx_ptrarray_t *cx_ptrarray_new_full(size_t reserve, cx_free_func free)
+cx_array_t *cx_array_new_full(size_t reserve, cx_free_func free)
 {
-  cx_ptrarray_t *arr = calloc(1, sizeof(cx_ptrarray_t));
+  cx_array_t *arr = calloc(1, sizeof(cx_array_t));
   if (arr == NULL)
     return NULL;
-  if (cx_ptrarray_init_full(arr, reserve, free) != 0)
+  if (cx_array_init_full(arr, reserve, free) != 0)
   {
     free(arr);
     arr = NULL;
@@ -50,15 +50,15 @@ cx_ptrarray_t *cx_ptrarray_new_full(size_t reserve, cx_free_func free)
   return arr;
 }
 
-void cx_ptrarray_free(cx_ptrarray_t *arr)
+void cx_array_free(cx_array_t *arr)
 {
   if (arr == NULL)
     return;
-  cx_ptrarray_cleanup(arr);
+  cx_array_cleanup(arr);
   free(arr);
 }
 
-int cx_ptrarray_reserve(cx_ptrarray_t *arr, size_t reserve)
+int cx_array_reserve(cx_array_t *arr, size_t reserve)
 {
   assert(arr);
   if (reserve > arr->capacity)
@@ -72,7 +72,7 @@ int cx_ptrarray_reserve(cx_ptrarray_t *arr, size_t reserve)
   return 0;
 }
 
-int cx_ptrarray_compact(cx_ptrarray_t *arr)
+int cx_array_compact(cx_array_t *arr)
 {
   assert(arr);
   if (arr->size != arr->capacity)
@@ -86,7 +86,7 @@ int cx_ptrarray_compact(cx_ptrarray_t *arr)
   return 0;
 }
 
-int cx_ptrarray_clear(cx_ptrarray_t *arr)
+int cx_array_clear(cx_array_t *arr)
 {
   assert(arr);
   if (arr->free)
@@ -98,7 +98,7 @@ int cx_ptrarray_clear(cx_ptrarray_t *arr)
   return 0;
 }
 
-static int cx_ptrarray_ensure_capacity(cx_ptrarray_t *arr, size_t req_cap)
+static int cx_array_ensure_capacity(cx_array_t *arr, size_t req_cap)
 {
   assert(arr);
   if (req_cap > arr->capacity)
@@ -124,14 +124,14 @@ static int cx_ptrarray_ensure_capacity(cx_ptrarray_t *arr, size_t req_cap)
   return 0;
 }
 
-int cx_ptrarray_insert(cx_ptrarray_t *arr, size_t pos, void *item)
+int cx_array_insert(cx_array_t *arr, size_t pos, void *item)
 {
   assert(arr);
   assert(pos <= arr->size);
 
   size_t new_size = arr->size + 1;
 
-  if (cx_ptrarray_ensure_capacity(arr, new_size) != 0)
+  if (cx_array_ensure_capacity(arr, new_size) != 0)
     return -1;
 
   // move existing items out of the way
@@ -144,19 +144,19 @@ int cx_ptrarray_insert(cx_ptrarray_t *arr, size_t pos, void *item)
   return 0;
 }
 
-int cx_ptrarray_prepend(cx_ptrarray_t *arr, void *item)
+int cx_array_prepend(cx_array_t *arr, void *item)
 {
   assert(arr);
-  return cx_ptrarray_insert(arr, 0, item);
+  return cx_array_insert(arr, 0, item);
 }
 
-int cx_ptrarray_append(cx_ptrarray_t *arr, void *item)
+int cx_array_append(cx_array_t *arr, void *item)
 {
   assert(arr);
-  return cx_ptrarray_insert(arr, arr->size, item);
+  return cx_array_insert(arr, arr->size, item);
 }
 
-int cx_ptrarray_remove(cx_ptrarray_t *arr, size_t pos)
+int cx_array_remove(cx_array_t *arr, size_t pos)
 {
   assert(arr);
   assert(pos < arr->size);
@@ -168,14 +168,14 @@ int cx_ptrarray_remove(cx_ptrarray_t *arr, size_t pos)
   return 0;
 }
 
-void *cx_ptrarray_index(const cx_ptrarray_t *arr, size_t index)
+void *cx_array_index(const cx_array_t *arr, size_t index)
 {
   assert(arr);
   assert(index < arr->size);
   return arr->items[index];
 }
 
-int cx_ptrarray_sort(cx_ptrarray_t *arr, cx_compare_func cmp)
+int cx_array_sort(cx_array_t *arr, cx_compare_func cmp)
 {
   assert(arr);
   assert(cmp);
@@ -183,7 +183,7 @@ int cx_ptrarray_sort(cx_ptrarray_t *arr, cx_compare_func cmp)
   return 0;
 }
 
-int cx_ptrarray_reverse(cx_ptrarray_t *arr)
+int cx_array_reverse(cx_array_t *arr)
 {
   assert(arr);
   for (size_t i = 0; i < arr->size / 2; i++)
@@ -195,7 +195,7 @@ int cx_ptrarray_reverse(cx_ptrarray_t *arr)
   return 0;
 }
 
-int cx_ptrarray_foreach(const cx_ptrarray_t *arr, cx_each_func fnc, void *data)
+int cx_array_foreach(const cx_array_t *arr, cx_each_func fnc, void *data)
 {
   assert(arr);
   assert(fnc);

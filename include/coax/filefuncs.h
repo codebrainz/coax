@@ -5,7 +5,7 @@
 #error "Only <coax.h> can be included directly."
 #endif
 
-#include <coax/ptrarray.h>
+#include <coax/array.h>
 #include <coax/str.h>
 
 #include <stddef.h>
@@ -16,6 +16,6 @@ int cx_file_set_contents(const char *fn, const char *data, size_t count);
 int cx_file_get_contents_str(const char *fn, cx_str_t *contents);
 int cx_file_set_contents_str(const char *fn, const cx_str_t *contents);
 
-int cx_file_read_lines(const char *fn, cx_ptrarray_t *lines);
+int cx_file_read_lines(const char *fn, cx_array_t *lines);
 
 #endif // CX_FILEFUNCS_H

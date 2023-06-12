@@ -120,14 +120,14 @@ char *cx_strtok(char *str, const char *delim, char **saveptr)
   return strtok_r(str, delim, saveptr);
 }
 
-int cx_strsplit(const char *str, const char *delim, cx_ptrarray_t *result)
+int cx_strsplit(const char *str, const char *delim, cx_array_t *result)
 {
   assert(str);
   assert(result);
   return cx_strnsplit(str, strlen(str), delim, result);
 }
 
-int cx_strnsplit(const char *str, size_t len, const char *delim, cx_ptrarray_t *result)
+int cx_strnsplit(const char *str, size_t len, const char *delim, cx_array_t *result)
 {
   assert(str);
   assert(result);
@@ -154,7 +154,7 @@ int cx_strnsplit(const char *str, size_t len, const char *delim, cx_ptrarray_t *
       return -1;
     }
 
-    if (cx_ptrarray_append(result, token_copy) != 0)
+    if (cx_array_append(result, token_copy) != 0)
     {
       free(token_copy);
       free(copy);
@@ -166,7 +166,7 @@ int cx_strnsplit(const char *str, size_t len, const char *delim, cx_ptrarray_t *
 
   free(copy);
 
-  if (cx_ptrarray_reserve(result, result->size + 1) != 0)
+  if (cx_array_reserve(result, result->size + 1) != 0)
     return -1;
 
   result->items[result->size] = NULL;

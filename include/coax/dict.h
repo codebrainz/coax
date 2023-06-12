@@ -5,9 +5,9 @@
 #error "Only <coax.h> can be included directly."
 #endif
 
+#include <coax/array.h>
 #include <coax/funcs.h>
 #include <coax/list.h>
-#include <coax/ptrarray.h>
 
 #include <stddef.h>
 
@@ -16,7 +16,7 @@ typedef struct cx_dict cx_dict_t;
 struct cx_dict
 {
   size_t len;
-  cx_ptrarray_t buckets;
+  cx_array_t buckets;
   cx_hash_func hash;
   cx_equal_func equal;
   cx_free_func key_free;

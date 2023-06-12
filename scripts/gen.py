@@ -4,13 +4,13 @@ import re
 import sys
 
 headers = [
+    "array.h",
     "dict.h",
     "filefuncs.h",
     "funcs.h",
     "list.h",
     "md5.h",
     "pair.h",
-    "ptrarray.h",
     "queue.h",
     "stack.h",
     "str.h",
@@ -18,12 +18,12 @@ headers = [
 ]
 
 sources = [
+    "array.c",
     "dict.c",
     "filefuncs.c",
     "list.c",
     "md5.c",
     "pair.c",
-    "ptrarray.c",
     "queue.c",
     "stack.c",
     "str.c",

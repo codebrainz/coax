@@ -71,7 +71,7 @@ int cx_dict_init_full(cx_dict_t *dict,
   dict->key_free = key_free;
   dict->value_free = value_free;
 
-  if (cx_ptrarray_init_full(&dict->buckets, CX_DICT_INIT_BUCKETS, cx_dict_free_bucket) != 0)
+  if (cx_array_init_full(&dict->buckets, CX_DICT_INIT_BUCKETS, cx_dict_free_bucket) != 0)
     return -1;
 
   for (size_t i = 0; i < CX_DICT_INIT_BUCKETS; i++)
@@ -82,7 +82,7 @@ int cx_dict_init_full(cx_dict_t *dict,
       cx_dict_cleanup(dict);
       return -1;
     }
-    if (cx_ptrarray_append(&dict->buckets, lst) != 0)
+    if (cx_array_append(&dict->buckets, lst) != 0)
     {
       cx_dict_cleanup(dict);
       return -1;
@@ -96,7 +96,7 @@ int cx_dict_cleanup(cx_dict_t *dict)
 {
   assert(dict);
   cx_dict_clear(dict);
-  cx_ptrarray_cleanup(&dict->buckets);
+  cx_array_cleanup(&dict->buckets);
   return 0;
 }
 
@@ -151,8 +151,8 @@ static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
   assert(dict);
 
   // create new buckets table
-  cx_ptrarray_t new_buckets = CX_PTRARRAY_INIT;
-  if (cx_ptrarray_init_full(&new_buckets, new_n_buckets, NULL) != 0)
+  cx_array_t new_buckets = CX_ARRAY_INIT;
+  if (cx_array_init_full(&new_buckets, new_n_buckets, NULL) != 0)
     return -1;
 
   // setup new buckets table
@@ -161,12 +161,12 @@ static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
     cx_list_t *lst = cx_list_new_full(NULL);
     if (lst == NULL)
     {
-      cx_ptrarray_cleanup(&new_buckets);
+      cx_array_cleanup(&new_buckets);
       return -1;
     }
-    if (cx_ptrarray_append(&new_buckets, lst) != 0)
+    if (cx_array_append(&new_buckets, lst) != 0)
     {
-      cx_ptrarray_cleanup(&new_buckets);
+      cx_array_cleanup(&new_buckets);
       return -1;
     }
   }
@@ -184,7 +184,7 @@ static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
       cx_list_t *dst_lst = new_buckets.items[hk];
       if (cx_list_push_head(dst_lst, ent) != 0)
       {
-        cx_ptrarray_cleanup(&new_buckets);
+        cx_array_cleanup(&new_buckets);
         return -1;
       }
     }
@@ -193,9 +193,9 @@ static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
   dict->buckets.free = NULL; // prevent freeing later
 
   // swap in the new table
-  cx_ptrarray_t old_buckets = CX_PTRARRAY_INIT;
-  memcpy(&old_buckets, &dict->buckets, sizeof(cx_ptrarray_t));
-  memcpy(&dict->buckets, &new_buckets, sizeof(cx_ptrarray_t));
+  cx_array_t old_buckets = CX_ARRAY_INIT;
+  memcpy(&old_buckets, &dict->buckets, sizeof(cx_array_t));
+  memcpy(&dict->buckets, &new_buckets, sizeof(cx_array_t));
 
   // add the free handlers into new buckets table
   dict->buckets.free = cx_dict_free_bucket;
@@ -206,7 +206,7 @@ static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
   }
 
   // cleanup up the old table (won't free any elements)
-  cx_ptrarray_cleanup(&old_buckets);
+  cx_array_cleanup(&old_buckets);
 
   return 0;
 }
