@@ -6,6 +6,7 @@
 #include <coax/funcs.h>
 #include <coax/list.h>
 #include <coax/md5.h>
+#include <coax/pair.h>
 #include <coax/ptrarray.h>
 #include <coax/queue.h>
 #include <coax/stack.h>
