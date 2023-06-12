@@ -7,6 +7,7 @@
 #include <coax/list.h>
 #include <coax/md5.h>
 #include <coax/ptrarray.h>
+#include <coax/queue.h>
 #include <coax/stack.h>
 #include <coax/str.h>
 #include <coax/strfuncs.h>
