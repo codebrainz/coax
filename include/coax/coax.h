@@ -6,6 +6,7 @@
 #include <coax/filefuncs.h>
 #include <coax/funcs.h>
 #include <coax/list.h>
+#include <coax/macros.h>
 #include <coax/md5.h>
 #include <coax/pair.h>
 #include <coax/queue.h>

@@ -1,4 +1,5 @@
 #include <coax/array.h>
+#include <coax/macros.h>
 
 #include <assert.h>
 #include <stdlib.h>
@@ -6,19 +7,19 @@
 
 int cx_array_init(cx_array_t *arr)
 {
-  assert(arr);
+  CX_CHECK_ARG(arr != NULL);
   return cx_array_init_full(arr, 0, NULL);
 }
 
 int cx_array_init_full(cx_array_t *arr, size_t reserve, cx_free_func free)
 {
-  assert(arr);
+  CX_CHECK_ARG(arr != NULL);
 
   arr->items = NULL;
   arr->size = arr->capacity = 0;
   arr->free = free;
 
-  if (reserve > 0 && cx_array_reserve(arr, reserve) != 0)
+  if (reserve > 0 && CX_UNLIKELY(cx_array_reserve(arr, reserve) != 0))
     return -1;
 
   return 0;
@@ -26,7 +27,7 @@ int cx_array_init_full(cx_array_t *arr, size_t reserve, cx_free_func free)
 
 int cx_array_cleanup(cx_array_t *arr)
 {
-  assert(arr);
+  CX_CHECK_ARG(arr != NULL);
   cx_array_clear(arr);
   free(arr->items);
   return 0;
@@ -40,9 +41,9 @@ cx_array_t *cx_array_new(void)
 cx_array_t *cx_array_new_full(size_t reserve, cx_free_func free)
 {
   cx_array_t *arr = calloc(1, sizeof(cx_array_t));
-  if (arr == NULL)
+  if (CX_UNLIKELY(arr == NULL))
     return NULL;
-  if (cx_array_init_full(arr, reserve, free) != 0)
+  else if (CX_UNLIKELY(cx_array_init_full(arr, reserve, free) != 0))
   {
     free(arr);
     arr = NULL;
@@ -52,19 +53,18 @@ cx_array_t *cx_array_new_full(size_t reserve, cx_free_func free)
 
 void cx_array_free(cx_array_t *arr)
 {
-  if (arr == NULL)
-    return;
+  CX_CHECK_ARG_NO_RETVAL(arr != NULL);
   cx_array_cleanup(arr);
   free(arr);
 }
 
 int cx_array_reserve(cx_array_t *arr, size_t reserve)
 {
-  assert(arr);
+  CX_CHECK_ARG(arr != NULL);
   if (reserve > arr->capacity)
   {
     void *tmp = realloc(arr->items, reserve * sizeof(void *));
-    if (tmp == NULL)
+    if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;
     arr->capacity = reserve;
@@ -74,11 +74,11 @@ int cx_array_reserve(cx_array_t *arr, size_t reserve)
 
 int cx_array_compact(cx_array_t *arr)
 {
-  assert(arr);
-  if (arr->size != arr->capacity)
+  CX_CHECK_ARG(arr != NULL);
+  if (CX_LIKELY(arr->size != arr->capacity))
   {
     void *tmp = realloc(arr->items, arr->size * sizeof(void *));
-    if (tmp == NULL)
+    if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;
     arr->capacity = arr->size;
@@ -88,7 +88,7 @@ int cx_array_compact(cx_array_t *arr)
 
 int cx_array_clear(cx_array_t *arr)
 {
-  assert(arr);
+  CX_CHECK_ARG(arr != NULL);
   if (arr->free)
   {
     for (size_t i = 0; i < arr->size; i++)
@@ -100,14 +100,13 @@ int cx_array_clear(cx_array_t *arr)
 
 static int cx_array_ensure_capacity(cx_array_t *arr, size_t req_cap)
 {
-  assert(arr);
   if (req_cap > arr->capacity)
   {
     size_t new_cap = arr->capacity * 2;
     if (req_cap > new_cap)
       new_cap = req_cap;
     void *tmp = realloc(arr->items, new_cap * sizeof(void *));
-    if (tmp == NULL)
+    if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;
     arr->capacity = new_cap;
@@ -116,7 +115,7 @@ static int cx_array_ensure_capacity(cx_array_t *arr, size_t req_cap)
   {
     size_t new_cap = arr->capacity / 2;
     void *tmp = realloc(arr->items, new_cap * sizeof(void *));
-    if (tmp == NULL)
+    if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;
     arr->capacity = new_cap;
@@ -126,12 +125,12 @@ static int cx_array_ensure_capacity(cx_array_t *arr, size_t req_cap)
 
 int cx_array_insert(cx_array_t *arr, size_t pos, void *item)
 {
-  assert(arr);
-  assert(pos <= arr->size);
+  CX_CHECK_ARG(arr != NULL);
+  CX_CHECK_ARG(pos <= arr->size);
 
   size_t new_size = arr->size + 1;
 
-  if (cx_array_ensure_capacity(arr, new_size) != 0)
+  if (CX_LIKELY(cx_array_ensure_capacity(arr, new_size) != 0))
     return -1;
 
   // move existing items out of the way
@@ -146,20 +145,19 @@ int cx_array_insert(cx_array_t *arr, size_t pos, void *item)
 
 int cx_array_prepend(cx_array_t *arr, void *item)
 {
-  assert(arr);
   return cx_array_insert(arr, 0, item);
 }
 
 int cx_array_append(cx_array_t *arr, void *item)
 {
-  assert(arr);
+  CX_CHECK_ARG(arr != NULL);
   return cx_array_insert(arr, arr->size, item);
 }
 
 int cx_array_remove(cx_array_t *arr, size_t pos)
 {
-  assert(arr);
-  assert(pos < arr->size);
+  CX_CHECK_ARG(arr != NULL);
+  CX_CHECK_ARG(pos < arr->size);
   if (arr->free)
     arr->free(arr->items[pos]);
   for (size_t i = pos; i < arr->size; i++)
@@ -170,22 +168,24 @@ int cx_array_remove(cx_array_t *arr, size_t pos)
 
 void *cx_array_index(const cx_array_t *arr, size_t index)
 {
-  assert(arr);
-  assert(index < arr->size);
+  if (CX_UNLIKELY(arr != NULL))
+    return NULL;
+  else if (CX_UNLIKELY(index < arr->size))
+    return NULL;
   return arr->items[index];
 }
 
 int cx_array_sort(cx_array_t *arr, cx_compare_func cmp)
 {
-  assert(arr);
-  assert(cmp);
+  CX_CHECK_ARG(arr != NULL);
+  CX_CHECK_ARG(cmp);
   qsort(arr->items, arr->size, sizeof(void *), cmp);
   return 0;
 }
 
 int cx_array_reverse(cx_array_t *arr)
 {
-  assert(arr);
+  CX_CHECK_ARG(arr != NULL);
   for (size_t i = 0; i < arr->size / 2; i++)
   {
     void *tmp = arr->items[i];
@@ -197,8 +197,8 @@ int cx_array_reverse(cx_array_t *arr)
 
 int cx_array_foreach(const cx_array_t *arr, cx_each_func fnc, void *data)
 {
-  assert(arr);
-  assert(fnc);
+  CX_CHECK_ARG(arr != NULL);
+  CX_CHECK_ARG(fnc);
   int cnt = 0;
   for (size_t i = 0; i < arr->size; i++)
   {
