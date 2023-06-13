@@ -1,14 +1,14 @@
 #include <coax/filefuncs.h>
+#include <coax/macros.h>
 #include <coax/strfuncs.h>
 
-#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
 
 char *cx_file_get_contents(const char *fn, size_t *count)
 {
-  assert(fn);
+  CX_CHECK_ARG_RET_VAL(fn != NULL, NULL);
 
   FILE *fp = NULL;
   char *buf = NULL;
@@ -56,9 +56,9 @@ failure_exit : {
 
 int cx_file_set_contents(const char *fn, const char *data, size_t count)
 {
-  assert(fn);
-  assert(data);
-  assert(count > 0);
+  CX_CHECK_ARG(fn);
+  CX_CHECK_ARG(data);
+  CX_CHECK_ARG(count > 0);
 
   FILE *fp = fopen(fn, "wb");
   if (fp == NULL)
@@ -81,8 +81,8 @@ failure_exit : {
 
 int cx_file_get_contents_str(const char *fn, cx_str_t *contents)
 {
-  assert(fn);
-  assert(contents);
+  CX_CHECK_ARG(fn);
+  CX_CHECK_ARG(contents);
 
   size_t count = 0;
   char *buf = NULL;
@@ -101,15 +101,15 @@ int cx_file_get_contents_str(const char *fn, cx_str_t *contents)
 
 int cx_file_set_contents_str(const char *fn, const cx_str_t *contents)
 {
-  assert(fn);
-  assert(contents);
+  CX_CHECK_ARG(fn);
+  CX_CHECK_ARG(contents);
   return cx_file_set_contents(fn, contents->data, contents->size);
 }
 
 int cx_file_read_lines(const char *fn, cx_array_t *lines)
 {
-  assert(fn);
-  assert(lines);
+  CX_CHECK_ARG(fn);
+  CX_CHECK_ARG(lines);
 
   cx_str_t contents = CX_STR_INIT;
 

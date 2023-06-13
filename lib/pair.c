@@ -1,12 +1,12 @@
+#include <coax/macros.h>
 #include <coax/pair.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 int cx_pair_init(cx_pair_t *pr, void *first, void *second)
 {
-  assert(pr);
+  CX_CHECK_ARG(pr);
   pr->items[CX_PAIR_FIRST_INDEX] = first;
   pr->items[CX_PAIR_SECOND_INDEX] = second;
   return 0;
@@ -14,7 +14,7 @@ int cx_pair_init(cx_pair_t *pr, void *first, void *second)
 
 int cx_pair_cleanup(cx_pair_t *pr)
 {
-  assert(pr);
+  CX_CHECK_ARG(pr);
   if (pr == NULL)
     return -1;
   memset(pr, 0, sizeof(cx_pair_t));

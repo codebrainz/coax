@@ -1,18 +1,18 @@
 #include <coax/list.h>
+#include <coax/macros.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
 int cx_list_init(cx_list_t *lst)
 {
-  assert(lst);
+  CX_CHECK_ARG(lst);
   return cx_list_init_full(lst, NULL);
 }
 
 int cx_list_init_full(cx_list_t *lst, cx_free_func free_func)
 {
-  assert(lst);
+  CX_CHECK_ARG(lst);
   memset(lst, 0, sizeof(cx_list_t));
   lst->free = free_func;
   return 0;
@@ -20,7 +20,7 @@ int cx_list_init_full(cx_list_t *lst, cx_free_func free_func)
 
 int cx_list_cleanup(cx_list_t *lst)
 {
-  assert(lst);
+  CX_CHECK_ARG(lst);
   cx_list_clear(lst);
   memset(lst, 0, sizeof(cx_list_t));
   return 0;
@@ -46,14 +46,14 @@ cx_list_t *cx_list_new_full(cx_free_func free_func)
 
 void cx_list_free(cx_list_t *lst)
 {
-  assert(lst);
+  CX_CHECK_ARG_NO_RETVAL(lst);
   cx_list_cleanup(lst);
   free(lst);
 }
 
 int cx_list_clear(cx_list_t *lst)
 {
-  assert(lst);
+  CX_CHECK_ARG(lst);
   cx_list_entry_t *it = lst->head;
   while (it != NULL)
   {
@@ -68,7 +68,7 @@ int cx_list_clear(cx_list_t *lst)
 
 int cx_list_push_head(cx_list_t *lst, void *data)
 {
-  assert(lst);
+  CX_CHECK_ARG(lst);
   cx_list_entry_t *ent = calloc(1, sizeof(cx_list_entry_t));
   if (ent == NULL)
     return -1;
@@ -86,6 +86,7 @@ int cx_list_push_head(cx_list_t *lst, void *data)
 
 int cx_list_push_tail(cx_list_t *lst, void *data)
 {
+  CX_CHECK_ARG(lst);
   cx_list_entry_t *ent = calloc(1, sizeof(cx_list_entry_t));
   if (ent == NULL)
     return -1;
@@ -103,7 +104,7 @@ int cx_list_push_tail(cx_list_t *lst, void *data)
 
 int cx_list_pop_head(cx_list_t *lst, bool do_free)
 {
-  assert(lst);
+  CX_CHECK_ARG(lst);
   cx_list_entry_t *ent = lst->head;
   cx_list_unlink(lst, ent);
   if (do_free && lst->free)
@@ -114,7 +115,7 @@ int cx_list_pop_head(cx_list_t *lst, bool do_free)
 
 int cx_list_pop_tail(cx_list_t *lst, bool do_free)
 {
-  assert(lst);
+  CX_CHECK_ARG(lst);
   cx_list_entry_t *ent = lst->tail;
   cx_list_unlink(lst, ent);
   if (do_free && lst->free)
@@ -125,8 +126,8 @@ int cx_list_pop_tail(cx_list_t *lst, bool do_free)
 
 int cx_list_remove_nth(cx_list_t *lst, size_t len, bool do_free)
 {
-  assert(lst);
-  assert(len < lst->len);
+  CX_CHECK_ARG(lst);
+  CX_CHECK_ARG(len < lst->len);
   size_t i = 0;
   cx_list_entry_t *it = lst->head;
   while (it != NULL)
@@ -148,8 +149,8 @@ int cx_list_remove_nth(cx_list_t *lst, size_t len, bool do_free)
 
 int cx_list_foreach(cx_list_t *lst, cx_each_func fnc, void *data)
 {
-  assert(lst);
-  assert(fnc);
+  CX_CHECK_ARG(lst);
+  CX_CHECK_ARG(fnc);
   int cnt = 0;
   for (cx_list_entry_t *it = lst->head; it != NULL; it = it->next)
   {
@@ -162,9 +163,9 @@ int cx_list_foreach(cx_list_t *lst, cx_each_func fnc, void *data)
 
 int cx_list_unlink(cx_list_t *lst, cx_list_entry_t *ent)
 {
+  CX_CHECK_ARG(lst);
+  CX_CHECK_ARG(ent);
   // TODO: write this properly
-  assert(lst);
-  assert(ent);
   if (lst->len == 0)
     return -1;
   if (ent == lst->head)

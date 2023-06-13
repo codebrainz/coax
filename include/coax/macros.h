@@ -1,6 +1,7 @@
 #ifndef CX_MACROS_H
 #define CX_MACROS_H 1
 
+#include <assert.h>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,6 +15,12 @@
 #endif
 
 #ifndef NDEBUG
+
+#define CX_ASSERT(exp)      \
+  do                        \
+  {                         \
+    assert(CX_LIKELY(exp)); \
+  } while (0)
 
 #define CX_CHECK_ARG(exp)                                                                   \
   do                                                                                        \
@@ -37,7 +44,23 @@
     }                                                                                       \
   } while (0)
 
+#define CX_CHECK_ARG_RET_VAL(exp, val)                                                     \
+  do                                                                                       \
+  {                                                                                        \
+    if (CX_UNLIKELY(!(exp)))                                                               \
+    {                                                                                      \
+      fprintf(stderr, "error: %s:%u: assertion '" #exp "' failed!\n", __FILE__, __LINE__); \
+      return (val);                                                                        \
+    }                                                                                      \
+  } while (0)
+
 #else
+
+#define CX_ASSERT(exp) \
+  do                   \
+  {                    \
+    (void)(exp);       \
+  } while (0)
 
 #define CX_CHECK_ARG(exp)    \
   do                         \
@@ -57,6 +80,13 @@
       errno = EINVAL;               \
       return;                       \
     }                               \
+  } while (0)
+
+#define CX_CHECK_ARG_RET_VAL(exp, val) \
+  do                                   \
+  {                                    \
+    if (CX_UNLIKELY(!(exp)))           \
+      return (val);                    \
   } while (0)
 
 #endif // NDEBUG

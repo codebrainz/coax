@@ -1,7 +1,6 @@
 #include <coax/array.h>
 #include <coax/macros.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 

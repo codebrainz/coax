@@ -1,6 +1,6 @@
+#include <coax/macros.h>
 #include <coax/strfuncs.h>
 
-#include <assert.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <stdio.h>
@@ -80,13 +80,13 @@ char *cx_strdup_vfmt(const char *fmt, va_list ap)
 
 size_t cx_strhash(const char *s)
 {
-  assert(s != NULL);
+  CX_CHECK_ARG_RET_VAL(s, 0);
   return cx_strnhash(s, strlen(s));
 }
 
 size_t cx_strnhash(const char *s, size_t n)
 {
-  assert(s != NULL);
+  CX_CHECK_ARG_RET_VAL(s, 0);
   size_t hash = 0;
   for (size_t i = 0; i < n; i++)
     hash = s[i] + (hash << 6) + (hash << 16) - hash;
@@ -95,8 +95,8 @@ size_t cx_strnhash(const char *s, size_t n)
 
 bool cx_strequal(const char *s1, const char *s2)
 {
-  assert(s1 != NULL);
-  assert(s2 != NULL);
+  CX_CHECK_ARG_RET_VAL(s1, false);
+  CX_CHECK_ARG_RET_VAL(s2, false);
   if (!s1 && !s2)
     return true;
   else if ((!s1 && s2) || (s1 && !s2))
@@ -106,8 +106,8 @@ bool cx_strequal(const char *s1, const char *s2)
 
 bool cx_strnequal(const char *s1, const char *s2, size_t n)
 {
-  assert(s1 != NULL);
-  assert(s2 != NULL);
+  CX_CHECK_ARG_RET_VAL(s1, false);
+  CX_CHECK_ARG_RET_VAL(s2, false);
   if (!s1 && !s2)
     return true;
   else if ((!s1 && s2) || (s1 && !s2))
@@ -122,15 +122,15 @@ char *cx_strtok(char *str, const char *delim, char **saveptr)
 
 int cx_strsplit(const char *str, const char *delim, cx_array_t *result)
 {
-  assert(str);
-  assert(result);
+  CX_CHECK_ARG(str);
+  CX_CHECK_ARG(result);
   return cx_strnsplit(str, strlen(str), delim, result);
 }
 
 int cx_strnsplit(const char *str, size_t len, const char *delim, cx_array_t *result)
 {
-  assert(str);
-  assert(result);
+  CX_CHECK_ARG(str);
+  CX_CHECK_ARG(result);
 
   char *copy = cx_strndup(str, len);
   if (copy == NULL)

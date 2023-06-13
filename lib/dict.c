@@ -1,6 +1,6 @@
 #include <coax/dict.h>
+#include <coax/macros.h>
 
-#include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -17,28 +17,25 @@ struct cx_dict_entry
 
 static void cx_dict_free_bucket(void *bucketp)
 {
-  cx_list_t *lst = bucketp;
-  cx_list_free(lst);
+  cx_list_free((cx_list_t *)bucketp);
 }
 
 static void cx_dict_free_list_item(void *itemp)
 {
   struct cx_dict_entry *ent = itemp;
-  if (ent->dict)
-  {
-    if (ent->dict->key_free)
-      ent->dict->key_free(ent->key);
-    if (ent->dict->value_free)
-      ent->dict->value_free(ent->value);
-    free(ent);
-  }
+  CX_CHECK_ARG_NO_RETVAL(ent->dict);
+  if (ent->dict->key_free)
+    ent->dict->key_free(ent->key);
+  if (ent->dict->value_free)
+    ent->dict->value_free(ent->value);
+  free(ent);
 }
 
 static inline size_t cx_dict_hash(const cx_dict_t *dict, const void *key)
 {
   size_t hk = dict->hash(key);
   size_t res = hk % dict->buckets.size;
-  assert(res < dict->buckets.size);
+  CX_ASSERT(res < dict->buckets.size);
   return res;
 }
 
@@ -49,9 +46,6 @@ static inline double cx_dict_load_factor(const cx_dict_t *dict)
 
 int cx_dict_init(cx_dict_t *dict, cx_hash_func hash, cx_equal_func equal)
 {
-  assert(dict);
-  assert(hash);
-  assert(equal);
   return cx_dict_init_full(dict, hash, equal, NULL, NULL);
 }
 
@@ -61,9 +55,9 @@ int cx_dict_init_full(cx_dict_t *dict,
                       cx_free_func key_free,
                       cx_free_func value_free)
 {
-  assert(dict);
-  assert(hash);
-  assert(equal);
+  CX_CHECK_ARG(dict);
+  CX_CHECK_ARG(hash);
+  CX_CHECK_ARG(equal);
 
   dict->len = 0;
   dict->hash = hash;
@@ -71,18 +65,18 @@ int cx_dict_init_full(cx_dict_t *dict,
   dict->key_free = key_free;
   dict->value_free = value_free;
 
-  if (cx_array_init_full(&dict->buckets, CX_DICT_INIT_BUCKETS, cx_dict_free_bucket) != 0)
+  if (CX_UNLIKELY(cx_array_init_full(&dict->buckets, CX_DICT_INIT_BUCKETS, cx_dict_free_bucket) != 0))
     return -1;
 
   for (size_t i = 0; i < CX_DICT_INIT_BUCKETS; i++)
   {
     cx_list_t *lst = cx_list_new_full(cx_dict_free_list_item);
-    if (lst == NULL)
+    if (CX_UNLIKELY(lst == NULL))
     {
       cx_dict_cleanup(dict);
       return -1;
     }
-    if (cx_array_append(&dict->buckets, lst) != 0)
+    if (CX_UNLIKELY(cx_array_append(&dict->buckets, lst) != 0))
     {
       cx_dict_cleanup(dict);
       return -1;
@@ -94,7 +88,7 @@ int cx_dict_init_full(cx_dict_t *dict,
 
 int cx_dict_cleanup(cx_dict_t *dict)
 {
-  assert(dict);
+  CX_CHECK_ARG(dict);
   cx_dict_clear(dict);
   cx_array_cleanup(&dict->buckets);
   return 0;
@@ -102,37 +96,38 @@ int cx_dict_cleanup(cx_dict_t *dict)
 
 cx_dict_t *cx_dict_new(cx_hash_func hash, cx_equal_func equal)
 {
-  assert(hash);
-  assert(equal);
   return cx_dict_new_full(hash, equal, NULL, NULL);
 }
 
 cx_dict_t *cx_dict_new_full(cx_hash_func hash, cx_equal_func equal, cx_free_func key_free, cx_free_func value_free)
 {
-  assert(hash);
-  assert(equal);
+  CX_CHECK_ARG_RET_VAL(hash, NULL);
+  CX_CHECK_ARG_RET_VAL(equal, NULL);
+
   cx_dict_t *dict = calloc(1, sizeof(cx_dict_t));
-  if (dict == NULL)
+
+  if (CX_UNLIKELY(dict == NULL))
     return NULL;
-  if (cx_dict_init_full(dict, hash, equal, key_free, value_free) != 0)
+
+  if (CX_UNLIKELY(cx_dict_init_full(dict, hash, equal, key_free, value_free) != 0))
   {
     free(dict);
     dict = NULL;
   }
+
   return dict;
 }
 
 void cx_dict_free(cx_dict_t *dict)
 {
-  assert(dict);
+  CX_CHECK_ARG_NO_RETVAL(dict);
   cx_dict_cleanup(dict);
   free(dict);
 }
 
 int cx_dict_clear(cx_dict_t *dict)
 {
-  assert(dict);
-
+  CX_CHECK_ARG(dict);
   for (size_t i = 0; i < dict->buckets.size; i++)
   {
     cx_list_t *lst = dict->buckets.items[i];
@@ -142,29 +137,27 @@ int cx_dict_clear(cx_dict_t *dict)
       dict->len--;
     }
   }
-
   return 0;
 }
 
 static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
 {
-  assert(dict);
+  cx_array_t new_buckets = CX_ARRAY_INIT;
 
   // create new buckets table
-  cx_array_t new_buckets = CX_ARRAY_INIT;
-  if (cx_array_init_full(&new_buckets, new_n_buckets, NULL) != 0)
+  if (CX_UNLIKELY(cx_array_init_full(&new_buckets, new_n_buckets, NULL) != 0))
     return -1;
 
   // setup new buckets table
   for (size_t i = 0; i < new_n_buckets; i++)
   {
     cx_list_t *lst = cx_list_new_full(NULL);
-    if (lst == NULL)
+    if (CX_UNLIKELY(lst == NULL))
     {
       cx_array_cleanup(&new_buckets);
       return -1;
     }
-    if (cx_array_append(&new_buckets, lst) != 0)
+    if (CX_UNLIKELY(cx_array_append(&new_buckets, lst) != 0))
     {
       cx_array_cleanup(&new_buckets);
       return -1;
@@ -180,7 +173,7 @@ static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
       // put the existing entry in the new table
       struct cx_dict_entry *ent = it->data;
       size_t hk = dict->hash(ent->key) % new_buckets.size;
-      assert(hk < new_buckets.size);
+      CX_ASSERT(hk < new_buckets.size);
       cx_list_t *dst_lst = new_buckets.items[hk];
       if (cx_list_push_head(dst_lst, ent) != 0)
       {
@@ -213,7 +206,7 @@ static int cx_dict_rehash(cx_dict_t *dict, size_t new_n_buckets)
 
 static int cx_dict_rehash_if_needed(cx_dict_t *dict)
 {
-  assert(dict);
+  CX_CHECK_ARG(dict);
   double load_factor = cx_dict_load_factor(dict);
   if (load_factor > CX_DICT_GROW_FACTOR)
     return cx_dict_rehash(dict, dict->buckets.size * 2);
@@ -224,8 +217,8 @@ static int cx_dict_rehash_if_needed(cx_dict_t *dict)
 
 int cx_dict_get(const cx_dict_t *dict, const void *key, void **value)
 {
-  assert(dict);
-  assert(key);
+  CX_CHECK_ARG(dict);
+  CX_CHECK_ARG(key);
 
   size_t hk = cx_dict_hash(dict, key);
   cx_list_t *lst = dict->buckets.items[hk];
@@ -246,15 +239,13 @@ int cx_dict_get(const cx_dict_t *dict, const void *key, void **value)
 
 bool cx_dict_has(const cx_dict_t *dict, const void *key)
 {
-  assert(dict);
-  assert(key);
   return cx_dict_get(dict, key, NULL) == 1;
 }
 
 int cx_dict_set(cx_dict_t *dict, void *key, void *value)
 {
-  assert(dict);
-  assert(key);
+  CX_CHECK_ARG(dict);
+  CX_CHECK_ARG(key);
 
   bool replaced = false;
   size_t hk = cx_dict_hash(dict, key);
@@ -284,7 +275,7 @@ int cx_dict_set(cx_dict_t *dict, void *key, void *value)
     ent->dict = dict;
     ent->key = key;
     ent->value = value;
-    if (cx_list_push_head(lst, ent) != 0)
+    if (CX_UNLIKELY(cx_list_push_head(lst, ent) != 0))
     {
       free(ent);
       return -1;
@@ -299,8 +290,8 @@ int cx_dict_set(cx_dict_t *dict, void *key, void *value)
 
 int cx_dict_del(cx_dict_t *dict, const void *key)
 {
-  assert(dict);
-  assert(key);
+  CX_CHECK_ARG(dict);
+  CX_CHECK_ARG(key);
 
   bool deleted = false;
   size_t hk = cx_dict_hash(dict, key);
@@ -311,7 +302,7 @@ int cx_dict_del(cx_dict_t *dict, const void *key)
     struct cx_dict_entry *ent = it->data;
     if (dict->equal(key, ent->key))
     {
-      if (cx_list_unlink(lst, it) != 0)
+      if (CX_UNLIKELY(cx_list_unlink(lst, it) != 0))
         return -1;
       if (dict->key_free)
         dict->key_free(ent->key);

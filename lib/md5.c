@@ -3,6 +3,7 @@
  * and modified slightly to be functionally identical but condensed into control structures.
  */
 
+#include <coax/macros.h>
 #include <coax/md5.h>
 
 #include <stdlib.h>
@@ -59,6 +60,8 @@ uint32_t rotate_left(uint32_t x, uint32_t n)
  */
 void cx_md5_init(cx_md5_t *ctx)
 {
+  CX_CHECK_ARG_NO_RETVAL(ctx);
+
   ctx->size = (uint64_t)0;
 
   ctx->buffer[0] = (uint32_t)A;
@@ -75,6 +78,9 @@ void cx_md5_init(cx_md5_t *ctx)
  */
 void cx_md5_update(cx_md5_t *ctx, const uint8_t *input_buffer, size_t input_len)
 {
+  CX_CHECK_ARG_NO_RETVAL(ctx);
+  CX_CHECK_ARG_NO_RETVAL(input_buffer);
+
   uint32_t input[16];
   unsigned int offset = ctx->size % 64;
   ctx->size += (uint64_t)input_len;
@@ -110,6 +116,8 @@ void cx_md5_update(cx_md5_t *ctx, const uint8_t *input_buffer, size_t input_len)
  */
 void cx_md5_finalize(cx_md5_t *ctx)
 {
+  CX_CHECK_ARG_NO_RETVAL(ctx);
+
   uint32_t input[16];
   unsigned int offset = ctx->size % 64;
   unsigned int padding_length = offset < 56 ? 56 - offset : (56 + 64) - offset;
@@ -145,6 +153,9 @@ void cx_md5_finalize(cx_md5_t *ctx)
  */
 void cx_md5_step(uint32_t *buffer, const uint32_t *input)
 {
+  CX_CHECK_ARG_NO_RETVAL(buffer);
+  CX_CHECK_ARG_NO_RETVAL(input);
+
   uint32_t AA = buffer[0];
   uint32_t BB = buffer[1];
   uint32_t CC = buffer[2];
@@ -195,6 +206,9 @@ void cx_md5_step(uint32_t *buffer, const uint32_t *input)
  */
 void cx_md5_string(const char *input, uint8_t result[CX_MD5_DIGEST_LEN])
 {
+  CX_CHECK_ARG_NO_RETVAL(input);
+  CX_CHECK_ARG_NO_RETVAL(result);
+
   cx_md5_t ctx;
   cx_md5_init(&ctx);
   cx_md5_update(&ctx, (const uint8_t *)input, strlen(input));
@@ -205,6 +219,8 @@ void cx_md5_string(const char *input, uint8_t result[CX_MD5_DIGEST_LEN])
 
 void cx_md5_file(FILE *file, uint8_t result[CX_MD5_DIGEST_LEN])
 {
+  CX_CHECK_ARG_NO_RETVAL(file);
+
   char *input_buffer = malloc(1024);
   size_t input_size = 0;
 
@@ -212,9 +228,7 @@ void cx_md5_file(FILE *file, uint8_t result[CX_MD5_DIGEST_LEN])
   cx_md5_init(&ctx);
 
   while ((input_size = fread(input_buffer, 1, 1024, file)) > 0)
-  {
     cx_md5_update(&ctx, (uint8_t *)input_buffer, input_size);
-  }
 
   cx_md5_finalize(&ctx);
 
