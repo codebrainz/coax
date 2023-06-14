@@ -1,3 +1,4 @@
+#include <coax/alloc.h>
 #include <coax/macros.h>
 #include <coax/pair.h>
 
@@ -23,12 +24,12 @@ int cx_pair_cleanup(cx_pair_t *pr)
 
 cx_pair_t *cx_pair_new(void *first, void *second)
 {
-  cx_pair_t *pr = calloc(1, sizeof(cx_pair_t));
+  cx_pair_t *pr = cx_calloc(1, sizeof(cx_pair_t));
   if (pr == NULL)
     return NULL;
   if (cx_pair_init(pr, first, second) != 0)
   {
-    free(pr);
+    cx_free(pr);
     pr = NULL;
   }
   return pr;
@@ -39,5 +40,5 @@ void cx_pair_free(cx_pair_t *pr)
   if (pr == NULL)
     return;
   cx_pair_cleanup(pr);
-  free(pr);
+  cx_free(pr);
 }

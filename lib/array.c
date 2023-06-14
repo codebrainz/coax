@@ -1,3 +1,4 @@
+#include <coax/alloc.h>
 #include <coax/array.h>
 #include <coax/macros.h>
 
@@ -28,7 +29,7 @@ int cx_array_cleanup(cx_array_t *arr)
 {
   CX_CHECK_ARG(arr != NULL);
   cx_array_clear(arr);
-  free(arr->items);
+  cx_free(arr->items);
   return 0;
 }
 
@@ -39,12 +40,12 @@ cx_array_t *cx_array_new(void)
 
 cx_array_t *cx_array_new_full(size_t reserve, cx_free_func free)
 {
-  cx_array_t *arr = calloc(1, sizeof(cx_array_t));
+  cx_array_t *arr = cx_calloc(1, sizeof(cx_array_t));
   if (CX_UNLIKELY(arr == NULL))
     return NULL;
   else if (CX_UNLIKELY(cx_array_init_full(arr, reserve, free) != 0))
   {
-    free(arr);
+    cx_free(arr);
     arr = NULL;
   }
   return arr;
@@ -54,7 +55,7 @@ void cx_array_free(cx_array_t *arr)
 {
   CX_CHECK_ARG_NO_RETVAL(arr != NULL);
   cx_array_cleanup(arr);
-  free(arr);
+  cx_free(arr);
 }
 
 int cx_array_reserve(cx_array_t *arr, size_t reserve)
@@ -62,7 +63,7 @@ int cx_array_reserve(cx_array_t *arr, size_t reserve)
   CX_CHECK_ARG(arr != NULL);
   if (reserve > arr->capacity)
   {
-    void *tmp = realloc(arr->items, reserve * sizeof(void *));
+    void *tmp = cx_realloc(arr->items, reserve * sizeof(void *));
     if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;
@@ -76,7 +77,7 @@ int cx_array_compact(cx_array_t *arr)
   CX_CHECK_ARG(arr != NULL);
   if (CX_LIKELY(arr->size != arr->capacity))
   {
-    void *tmp = realloc(arr->items, arr->size * sizeof(void *));
+    void *tmp = cx_realloc(arr->items, arr->size * sizeof(void *));
     if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;
@@ -104,7 +105,7 @@ static int cx_array_ensure_capacity(cx_array_t *arr, size_t req_cap)
     size_t new_cap = arr->capacity * 2;
     if (req_cap > new_cap)
       new_cap = req_cap;
-    void *tmp = realloc(arr->items, new_cap * sizeof(void *));
+    void *tmp = cx_realloc(arr->items, new_cap * sizeof(void *));
     if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;
@@ -113,7 +114,7 @@ static int cx_array_ensure_capacity(cx_array_t *arr, size_t req_cap)
   else if (req_cap < (arr->capacity / 4))
   {
     size_t new_cap = arr->capacity / 2;
-    void *tmp = realloc(arr->items, new_cap * sizeof(void *));
+    void *tmp = cx_realloc(arr->items, new_cap * sizeof(void *));
     if (CX_UNLIKELY(tmp == NULL))
       return -1;
     arr->items = tmp;

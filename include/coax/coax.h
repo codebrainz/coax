@@ -1,6 +1,7 @@
 #ifndef CX_H
 #define CX_H 1
 
+#include <coax/alloc.h>
 #include <coax/array.h>
 #include <coax/dict.h>
 #include <coax/filefuncs.h>

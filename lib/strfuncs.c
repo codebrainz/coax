@@ -1,3 +1,4 @@
+#include <coax/alloc.h>
 #include <coax/macros.h>
 #include <coax/strfuncs.h>
 
@@ -18,7 +19,7 @@ size_t cx_strnlen(const char *s, size_t n)
 char *cx_strdup(const char *s)
 {
   size_t len = strlen(s);
-  char *ns = malloc(len + 1);
+  char *ns = cx_malloc(len + 1);
   if (ns == NULL)
     return NULL;
   memcpy(ns, s, len + 1);
@@ -28,7 +29,7 @@ char *cx_strdup(const char *s)
 char *cx_strndup(const char *s, size_t n)
 {
   size_t len = cx_strnlen(s, n);
-  char *ns = malloc(len + 1);
+  char *ns = cx_malloc(len + 1);
   if (ns == NULL)
     return NULL;
   strncpy(ns, s, len);
@@ -61,7 +62,7 @@ char *cx_strdup_vfmt(const char *fmt, va_list ap)
     return NULL;
 
   size = (size_t)n + 1;
-  p = malloc(size);
+  p = cx_malloc(size);
   if (p == NULL)
     return NULL;
 
@@ -71,7 +72,7 @@ char *cx_strdup_vfmt(const char *fmt, va_list ap)
 
   if (n < 0)
   {
-    free(p);
+    cx_free(p);
     return NULL;
   }
 
@@ -150,21 +151,21 @@ int cx_strnsplit(const char *str, size_t len, const char *delim, cx_array_t *res
 
     if (token_copy == NULL)
     {
-      free(copy);
+      cx_free(copy);
       return -1;
     }
 
     if (cx_array_append(result, token_copy) != 0)
     {
-      free(token_copy);
-      free(copy);
+      cx_free(token_copy);
+      cx_free(copy);
       return -1;
     }
 
     token = cx_strtok(NULL, delim, &saveptr);
   }
 
-  free(copy);
+  cx_free(copy);
 
   if (cx_array_reserve(result, result->size + 1) != 0)
     return -1;

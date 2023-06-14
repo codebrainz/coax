@@ -1,3 +1,4 @@
+#include <coax/alloc.h>
 #include <coax/filefuncs.h>
 #include <coax/macros.h>
 #include <coax/strfuncs.h>
@@ -27,7 +28,7 @@ char *cx_file_get_contents(const char *fn, size_t *count)
   if (fseek(fp, 0, SEEK_SET) != 0)
     goto failure_exit;
 
-  buf = malloc(len + 1);
+  buf = cx_malloc(len + 1);
   if (buf == NULL)
     goto failure_exit;
 
@@ -48,7 +49,7 @@ failure_exit : {
   int e = errno;
   if (fp != NULL)
     fclose(fp);
-  free(buf);
+  cx_free(buf);
   errno = e;
   return NULL;
 }
@@ -91,7 +92,7 @@ int cx_file_get_contents_str(const char *fn, cx_str_t *contents)
   if (buf == NULL)
     return -1;
 
-  free(contents->data);
+  cx_free(contents->data);
   contents->data = buf;
   contents->size = count;
   contents->capacity = count + 1;

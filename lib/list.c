@@ -1,3 +1,4 @@
+#include <coax/alloc.h>
 #include <coax/list.h>
 #include <coax/macros.h>
 
@@ -33,12 +34,12 @@ cx_list_t *cx_list_new(void)
 
 cx_list_t *cx_list_new_full(cx_free_func free_func)
 {
-  cx_list_t *lst = calloc(1, sizeof(cx_list_t));
+  cx_list_t *lst = cx_calloc(1, sizeof(cx_list_t));
   if (lst == NULL)
     return NULL;
   if (cx_list_init_full(lst, free_func) != 0)
   {
-    free(lst);
+    cx_free(lst);
     lst = NULL;
   }
   return lst;
@@ -48,7 +49,7 @@ void cx_list_free(cx_list_t *lst)
 {
   CX_CHECK_ARG_NO_RETVAL(lst);
   cx_list_cleanup(lst);
-  free(lst);
+  cx_free(lst);
 }
 
 int cx_list_clear(cx_list_t *lst)
@@ -60,7 +61,7 @@ int cx_list_clear(cx_list_t *lst)
     cx_list_entry_t *next = it->next;
     if (lst->free)
       lst->free(it->data);
-    free(it);
+    cx_free(it);
     it = next;
   }
   return 0;
@@ -69,7 +70,7 @@ int cx_list_clear(cx_list_t *lst)
 int cx_list_push_head(cx_list_t *lst, void *data)
 {
   CX_CHECK_ARG(lst);
-  cx_list_entry_t *ent = calloc(1, sizeof(cx_list_entry_t));
+  cx_list_entry_t *ent = cx_calloc(1, sizeof(cx_list_entry_t));
   if (ent == NULL)
     return -1;
   ent->data = data;
@@ -87,7 +88,7 @@ int cx_list_push_head(cx_list_t *lst, void *data)
 int cx_list_push_tail(cx_list_t *lst, void *data)
 {
   CX_CHECK_ARG(lst);
-  cx_list_entry_t *ent = calloc(1, sizeof(cx_list_entry_t));
+  cx_list_entry_t *ent = cx_calloc(1, sizeof(cx_list_entry_t));
   if (ent == NULL)
     return -1;
   ent->data = data;
@@ -109,7 +110,7 @@ int cx_list_pop_head(cx_list_t *lst, bool do_free)
   cx_list_unlink(lst, ent);
   if (do_free && lst->free)
     lst->free(ent->data);
-  free(ent);
+  cx_free(ent);
   return 0;
 }
 
@@ -120,7 +121,7 @@ int cx_list_pop_tail(cx_list_t *lst, bool do_free)
   cx_list_unlink(lst, ent);
   if (do_free && lst->free)
     lst->free(ent->data);
-  free(ent);
+  cx_free(ent);
   return 0;
 }
 
@@ -138,7 +139,7 @@ int cx_list_remove_nth(cx_list_t *lst, size_t len, bool do_free)
       cx_list_unlink(lst, it);
       if (do_free && lst->free)
         lst->free(it->data);
-      free(it);
+      cx_free(it);
       break;
     }
     it = next;

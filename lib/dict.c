@@ -1,3 +1,4 @@
+#include <coax/alloc.h>
 #include <coax/dict.h>
 #include <coax/macros.h>
 
@@ -28,7 +29,7 @@ static void cx_dict_free_list_item(void *itemp)
     ent->dict->key_free(ent->key);
   if (ent->dict->value_free)
     ent->dict->value_free(ent->value);
-  free(ent);
+  cx_free(ent);
 }
 
 static inline size_t cx_dict_hash(const cx_dict_t *dict, const void *key)
@@ -104,14 +105,14 @@ cx_dict_t *cx_dict_new_full(cx_hash_func hash, cx_equal_func equal, cx_free_func
   CX_CHECK_ARG_RET_VAL(hash, NULL);
   CX_CHECK_ARG_RET_VAL(equal, NULL);
 
-  cx_dict_t *dict = calloc(1, sizeof(cx_dict_t));
+  cx_dict_t *dict = cx_calloc(1, sizeof(cx_dict_t));
 
   if (CX_UNLIKELY(dict == NULL))
     return NULL;
 
   if (CX_UNLIKELY(cx_dict_init_full(dict, hash, equal, key_free, value_free) != 0))
   {
-    free(dict);
+    cx_free(dict);
     dict = NULL;
   }
 
@@ -122,7 +123,7 @@ void cx_dict_free(cx_dict_t *dict)
 {
   CX_CHECK_ARG_NO_RETVAL(dict);
   cx_dict_cleanup(dict);
-  free(dict);
+  cx_free(dict);
 }
 
 int cx_dict_clear(cx_dict_t *dict)
@@ -269,7 +270,7 @@ int cx_dict_set(cx_dict_t *dict, void *key, void *value)
 
   if (!replaced)
   {
-    struct cx_dict_entry *ent = calloc(1, sizeof(struct cx_dict_entry));
+    struct cx_dict_entry *ent = cx_calloc(1, sizeof(struct cx_dict_entry));
     if (ent == NULL)
       return -1;
     ent->dict = dict;
@@ -277,7 +278,7 @@ int cx_dict_set(cx_dict_t *dict, void *key, void *value)
     ent->value = value;
     if (CX_UNLIKELY(cx_list_push_head(lst, ent) != 0))
     {
-      free(ent);
+      cx_free(ent);
       return -1;
     }
     dict->len++;
@@ -308,8 +309,8 @@ int cx_dict_del(cx_dict_t *dict, const void *key)
         dict->key_free(ent->key);
       if (dict->value_free)
         dict->value_free(ent->value);
-      free(it);
-      free(ent);
+      cx_free(it);
+      cx_free(ent);
       deleted = true;
       break;
     }

@@ -3,6 +3,7 @@
  * and modified slightly to be functionally identical but condensed into control structures.
  */
 
+#include <coax/alloc.h>
 #include <coax/macros.h>
 #include <coax/md5.h>
 
@@ -221,7 +222,7 @@ void cx_md5_file(FILE *file, uint8_t result[CX_MD5_DIGEST_LEN])
 {
   CX_CHECK_ARG_NO_RETVAL(file);
 
-  char *input_buffer = malloc(1024);
+  char *input_buffer = cx_malloc(1024);
   size_t input_size = 0;
 
   cx_md5_t ctx;
@@ -232,7 +233,7 @@ void cx_md5_file(FILE *file, uint8_t result[CX_MD5_DIGEST_LEN])
 
   cx_md5_finalize(&ctx);
 
-  free(input_buffer);
+  cx_free(input_buffer);
 
   memcpy(result, ctx.digest, CX_MD5_DIGEST_LEN);
 }
