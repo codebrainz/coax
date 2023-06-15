@@ -6,6 +6,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define CX_UNUSED(x) ((void)(x))
+
 #ifdef __GNUC__
 #define CX_LIKELY(x) __builtin_expect(!!(x), 1)
 #define CX_UNLIKELY(x) __builtin_expect(!!(x), 0)
