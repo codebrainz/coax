@@ -21,6 +21,8 @@
 void *cx_malloc(size_t size);
 void *cx_calloc(size_t n, size_t size);
 void *cx_realloc(void *oldp, size_t size);
+void *cx_crealloc(void *oldp, size_t size);
 void cx_free(void *p);
+void *cx_memclear(void *p);
 
 #endif // CX_ALLOC_H
