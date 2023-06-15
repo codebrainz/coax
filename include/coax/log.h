@@ -1,6 +1,10 @@
 #ifndef CX_LOG_H
 #define CX_LOG_H 1
 
+#if !defined(CX_INSIDE_HEADER) && !defined(CX_INSIDE_COMPILATION)
+#error "Only <coax.h> can be included directly."
+#endif
+
 #ifndef CX_LOG_DOMAIN
 #define CX_LOG_DOMAIN "coax"
 #endif

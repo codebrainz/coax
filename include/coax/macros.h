@@ -1,6 +1,10 @@
 #ifndef CX_MACROS_H
 #define CX_MACROS_H 1
 
+#if !defined(CX_INSIDE_HEADER) && !defined(CX_INSIDE_COMPILATION)
+#error "Only <coax.h> can be included directly."
+#endif
+
 #include <coax/log.h>
 
 #include <assert.h>
