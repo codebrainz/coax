@@ -4,11 +4,14 @@ import re
 import sys
 
 headers = [
+    "alloc.h",
     "array.h",
     "dict.h",
     "filefuncs.h",
     "funcs.h",
     "list.h",
+    "log.h",
+    "macros.h",
     "md5.h",
     "pair.h",
     "queue.h",
@@ -18,10 +21,12 @@ headers = [
 ]
 
 sources = [
+    "alloc.c",
     "array.c",
     "dict.c",
     "filefuncs.c",
     "list.c",
+    "log.c",
     "md5.c",
     "pair.c",
     "queue.c",
@@ -85,6 +90,8 @@ def generate_code():
     code += "\n"
     code += "%%std_headers_hdr%%\n"
     code += "\n"
+    code += "#define M_INSIDE_HEADER 1\n"
+    code += "\n"
 
     hdr_code = ""
     for hdr in headers:
@@ -103,7 +110,7 @@ def generate_code():
 
     src_code = ""
     for src in sources:
-        src = f"src/{src}"
+        src = f"lib/{src}"
         with open(src, "r") as f:
             contents = f.read()
             src_code += contents.strip()
