@@ -1,6 +1,8 @@
 #ifndef CX_MACROS_H
 #define CX_MACROS_H 1
 
+#include <coax/log.h>
+
 #include <assert.h>
 #include <errno.h>
 #include <stdio.h>
@@ -18,42 +20,47 @@
 
 #ifndef NDEBUG
 
-#define CX_ASSERT(exp)      \
-  do                        \
-  {                         \
-    assert(CX_LIKELY(exp)); \
+#ifdef CX_FATAL_CHECK_ARG
+#define CX_CHECK_ARG_FUNC cx_fatal
+#else
+#define CX_CHECK_ARG_FUNC cx_error
+#endif
+
+#define CX_ASSERT(exp)                          \
+  do                                            \
+  {                                             \
+    if (CX_UNLIKELY(!(exp)))                    \
+      cx_fatal("assertion '" #exp "' failed!"); \
   } while (0)
 
-#define CX_CHECK_ARG(exp)                                                                   \
-  do                                                                                        \
-  {                                                                                         \
-    if (CX_UNLIKELY(!(exp)))                                                                \
-    {                                                                                       \
-      fprintf(stderr, "error:  %s:%u: assertion '" #exp "' failed!\n", __FILE__, __LINE__); \
-      abort();                                                                              \
-      return -1;                                                                            \
-    }                                                                                       \
+#define CX_CHECK_ARG(exp)                                \
+  do                                                     \
+  {                                                      \
+    if (CX_UNLIKELY(!(exp)))                             \
+    {                                                    \
+      CX_CHECK_ARG_FUNC("assertion '" #exp "' failed!"); \
+      return -1;                                         \
+    }                                                    \
   } while (0)
 
-#define CX_CHECK_ARG_NO_RETVAL(exp)                                                         \
-  do                                                                                        \
-  {                                                                                         \
-    if (CX_UNLIKELY(!(exp)))                                                                \
-    {                                                                                       \
-      fprintf(stderr, "error:  %s:%u: assertion '" #exp "' failed!\n", __FILE__, __LINE__); \
-      abort();                                                                              \
-      return;                                                                               \
-    }                                                                                       \
+#define CX_CHECK_ARG_NO_RETVAL(exp)                      \
+  do                                                     \
+  {                                                      \
+    if (CX_UNLIKELY(!(exp)))                             \
+    {                                                    \
+      CX_CHECK_ARG_FUNC("assertion '" #exp "' failed!"); \
+      return;                                            \
+    }                                                    \
   } while (0)
 
-#define CX_CHECK_ARG_RET_VAL(exp, val)                                                     \
-  do                                                                                       \
-  {                                                                                        \
-    if (CX_UNLIKELY(!(exp)))                                                               \
-    {                                                                                      \
-      fprintf(stderr, "error: %s:%u: assertion '" #exp "' failed!\n", __FILE__, __LINE__); \
-      return (val);                                                                        \
-    }                                                                                      \
+#define CX_CHECK_ARG_RET_VAL(exp, val)                   \
+  do                                                     \
+  {                                                      \
+    if (CX_UNLIKELY(!(exp)))                             \
+    {                                                    \
+      CX_CHECK_ARG_FUNC("assertion '" #exp "' failed!"); \
+      return (val);                                      \
+    }                                                    \
   } while (0)
 
 #else
