@@ -1,4 +1,5 @@
 #include <coax/alloc.h>
+#include <coax/log.h>
 #include <coax/macros.h>
 
 #include <stdio.h>
@@ -14,22 +15,24 @@ struct cx_memhdr
 #define CX_PTR2HDR(p) (CX_HDR(p) - 1)
 #define CX_HDR2PTR(h) (CX_HDR(p) + 1)
 
-#define CX_CHECK_OOM(p, func)                                        \
-  do                                                                 \
-  {                                                                  \
-    if (CX_UNLIKELY(!(p)))                                           \
-    {                                                                \
-      fprintf(stderr, "error: out of memory calling '%s'\n", #func); \
-      abort();                                                       \
-    }                                                                \
+#if CX_FATAL_OOM
+#define CX_CHECK_OOM(p, func)                         \
+  do                                                  \
+  {                                                   \
+    if (CX_UNLIKELY(!(p)))                            \
+      cx_fatal("out of memory calling '" #func "'!"); \
   } while (0)
+#else
+#define CX_CHECK_OOM(p, func) \
+  do                          \
+  {                           \
+  } while (0)
+#endif
 
 void *cx_malloc(size_t size)
 {
   void *p = CX_MALLOC(size + sizeof(struct cx_memhdr));
-#if CX_FATAL_OOM
   CX_CHECK_OOM(p, cx_malloc);
-#endif
   if (CX_LIKELY(p))
   {
     CX_HDR(p)->sz = size;
@@ -51,9 +54,7 @@ void *cx_realloc(void *oldp, size_t size)
   if (CX_UNLIKELY(oldp == NULL))
     return NULL;
   void *p = CX_REALLOC(CX_PTR2HDR(oldp), size);
-#if CX_FATAL_OOM
   CX_CHECK_OOM(p, cx_realloc);
-#endif
   if (CX_LIKELY(p))
   {
     CX_HDR(p)->sz = size;
@@ -68,9 +69,7 @@ void *cx_crealloc(void *oldp, size_t size)
     return NULL;
   size_t old_size = CX_PTR2HDR(oldp)->sz;
   void *p = CX_REALLOC(CX_PTR2HDR(oldp), size);
-#if CX_FATAL_OOM
   CX_CHECK_OOM(p, cx_realloc);
-#endif
   if (CX_LIKELY(p))
   {
     void *newp = CX_HDR2PTR(p);
