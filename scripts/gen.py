@@ -63,13 +63,16 @@ def generate_header_code(fn):
 
 
 def generate_code(ident):
+    ident = re.sub(r"_+$", "", ident) + "_"
+    ident_up = ident.upper()
+
     code = ""
-    code += "#ifndef CX_H\n"
-    code += "#define CX_H 1\n"
+    code += f"#ifndef {ident_up}HEADER_INCLUDED\n"
+    code += f"#define {ident_up}HEADER_INCLUDED 1\n"
     code += "\n"
     code += "%%std_headers_hdr%%\n"
     code += "\n"
-    code += "#define M_INSIDE_HEADER 1\n"
+    code += f"#define {ident_up}INSIDE_HEADER 1\n"
     code += "\n"
 
     hdr_code = ""
@@ -80,9 +83,9 @@ def generate_code(ident):
     code += hdr_code
 
     code += "\n"
-    code += "#endif // CX_H\n"
+    code += f"#endif // {ident_up}HEADER_INCLUDED\n"
     code += "\n"
-    code += "#ifdef CX_IMPLMENTATION\n"
+    code += f"#ifdef {ident_up}IMPLMENTATION\n"
     code += "\n"
     code += "%%std_headers_src%%\n"
     code += "\n"
@@ -98,7 +101,7 @@ def generate_code(ident):
     code += src_code
 
     code += "\n"
-    code += "#endif // CX_IMPLEMENTATION\n"
+    code += f"#endif // {ident_up}IMPLEMENTATION\n"
 
     code = re.sub(r"#include\s+\<coax\/(?P<file>[^\>]+)\>", "", code)
     code = re.sub(r"#include\s+\<(?P<file>[^\>]+)\>", "", code)
@@ -122,18 +125,44 @@ def generate_code(ident):
 
 
 def main(args):
-    par = argparse.ArgumentParser(
-        description="Generates combined single-file include for the Coax library"
+    parser = argparse.ArgumentParser(
+        description="generates combined single-file include for the coax library",
+        epilog="written and maintained by Matt <m@cdbz.ca>",
     )
-    par.add_argument(
-        "-i",
-        "--identifier",
+
+    parser.add_argument(
+        "-n",
+        "--ns",
         default="cx_",
-        help="Use a custom 'namespace' instead of 'cx_'",
+        metavar="IDENT",
+        help="use a custom namespace/prefix instead of 'cx_'",
     )
-    args = par.parse_args(args)
-    code = generate_code(args.identifier)
-    sys.stdout.write(code)
+
+    parser.add_argument(
+        "-o",
+        "--out",
+        default="-",
+        metavar="FILE",
+        help="file to write to (default stdout)",
+    )
+
+    args = parser.parse_args(args)
+
+    code = generate_code(args.ns)
+
+    if args.out == "-" or not args.out:
+        sys.stdout.write(code)
+    else:
+        old_contents = None
+        try:
+            with open(args.out, "r") as infile:
+                old_contents = infile.read()
+        except:
+            pass
+        if old_contents is not None and code != old_contents:
+            with open(args.out, "w") as outfile:
+                outfile.write(code)
+
     return 0
 
 
