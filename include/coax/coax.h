@@ -3,6 +3,7 @@
 
 #include <coax/alloc.h>
 #include <coax/array.h>
+#include <coax/crc32.h>
 #include <coax/dict.h>
 #include <coax/filefuncs.h>
 #include <coax/funcs.h>
