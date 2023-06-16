@@ -1,51 +1,30 @@
 #!/usr/bin/env python3
 
+import argparse
+import os
 import re
 import sys
 
+header_dir = os.path.join(os.path.dirname(__file__), "..", "include/coax")
+source_dir = os.path.join(os.path.dirname(__file__), "..", "lib")
+
 headers = [
-    "alloc.h",
-    "array.h",
-    "dict.h",
-    "filefuncs.h",
-    "funcs.h",
-    "list.h",
-    "log.h",
-    "macros.h",
-    "md5.h",
-    "pair.h",
-    "queue.h",
-    "stack.h",
-    "str.h",
-    "strfuncs.h",
+    os.path.join(header_dir, hdr)
+    for hdr in os.listdir(header_dir)
+    if os.path.basename(hdr) != "coax.h"
 ]
 
-sources = [
-    "alloc.c",
-    "array.c",
-    "dict.c",
-    "filefuncs.c",
-    "list.c",
-    "log.c",
-    "md5.c",
-    "pair.c",
-    "queue.c",
-    "stack.c",
-    "str.c",
-    "strfuncs.c",
-]
+sources = [os.path.join(source_dir, src) for src in os.listdir(source_dir)]
+
 
 headers_included = set()
 std_headers_included_hdr = set()
 std_headers_included_src = set()
 
-repl_lower = ("cx_", "m_")
-repl_upper = ("CX_", "M_")
 
-
-def replace_prefix(code):
-    code = re.sub(repl_lower[0], repl_lower[1], code)
-    code = re.sub(repl_upper[0], repl_upper[1], code)
+def replace_prefix(code, ident):
+    code = re.sub("cx_", ident.lower(), code)
+    code = re.sub("CX_", ident.upper(), code)
     return code
 
 
@@ -77,13 +56,13 @@ def generate_header_code(fn):
         includes = find_includes(contents)
         headers_included.add(fn)
         for inc in includes:
-            c = generate_header_code(f"include/coax/{inc}")
+            c = generate_header_code(f"{header_dir}/{inc}")
             code += c
         code += contents + "\n\n"
     return code
 
 
-def generate_code():
+def generate_code(ident):
     code = ""
     code += "#ifndef CX_H\n"
     code += "#define CX_H 1\n"
@@ -95,7 +74,7 @@ def generate_code():
 
     hdr_code = ""
     for hdr in headers:
-        hdr = f"include/coax/{hdr}"
+        hdr = f"{hdr}"
         hdr_code += generate_header_code(hdr)
     hdr_code = find_std_includes(hdr_code, True)
     code += hdr_code
@@ -110,7 +89,7 @@ def generate_code():
 
     src_code = ""
     for src in sources:
-        src = f"lib/{src}"
+        src = f"{src}"
         with open(src, "r") as f:
             contents = f.read()
             src_code += contents.strip()
@@ -137,16 +116,26 @@ def generate_code():
     code = re.sub(r"%%std_headers_src%%", src_includes, code)
 
     code = re.sub(r"\n{2,}", "\n\n", code)
-    code = replace_prefix(code)
+    code = replace_prefix(code, ident)
 
     return code
 
 
 def main(args):
-    code = generate_code()
+    par = argparse.ArgumentParser(
+        description="Generates combined single-file include for the Coax library"
+    )
+    par.add_argument(
+        "-i",
+        "--identifier",
+        default="cx_",
+        help="Use a custom 'namespace' instead of 'cx_'",
+    )
+    args = par.parse_args(args)
+    code = generate_code(args.identifier)
     sys.stdout.write(code)
     return 0
 
 
 if __name__ == "__main__":
-    sys.exit(main(sys.argv))
+    sys.exit(main(sys.argv[1:]))
