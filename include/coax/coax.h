@@ -1,6 +1,8 @@
 #ifndef CX_H
 #define CX_H 1
 
+#define CX_INSIDE_HEADER 1
+
 #include <coax/alloc.h>
 #include <coax/array.h>
 #include <coax/crc32.h>
@@ -16,5 +18,7 @@
 #include <coax/stack.h>
 #include <coax/str.h>
 #include <coax/strfuncs.h>
+
+#undef CX_INSIDE_HEADER
 
 #endif // CX_H

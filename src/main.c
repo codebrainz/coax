@@ -1,4 +1,4 @@
-#include <coax.h>
+#include <coax/coax.h>
 
 int main()
 {
