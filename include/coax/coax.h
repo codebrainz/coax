@@ -5,6 +5,7 @@
 
 #include <coax/alloc.h>
 #include <coax/array.h>
+#include <coax/buffer.h>
 #include <coax/crc32.h>
 #include <coax/dict.h>
 #include <coax/filefuncs.h>

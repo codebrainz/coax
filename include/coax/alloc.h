@@ -29,4 +29,7 @@ void *cx_crealloc(void *oldp, size_t size);
 void cx_free(void *p);
 void *cx_memclear(void *p);
 
+#define cx_new_n(T, n) cx_calloc(n, sizeof(T))
+#define cx_new(T) cx_new_n(T, 1)
+
 #endif // CX_ALLOC_H

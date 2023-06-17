@@ -11,6 +11,7 @@ project(
 set(coax-lib-headers
   include/coax/alloc.h
   include/coax/array.h
+  include/coax/buffer.h
   include/coax/coax.h
   include/coax/crc32.h
   include/coax/dict.h
@@ -30,6 +31,7 @@ set(coax-lib-headers
 add_library(coax-lib
   lib/alloc.c
   lib/array.c
+  lib/buffer.c
   lib/crc32.c
   lib/dict.c
   lib/filefuncs.c
