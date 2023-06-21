@@ -15,6 +15,7 @@
 #include <coax/macros.h>
 #include <coax/md5.h>
 #include <coax/pair.h>
+#include <coax/platform.h>
 #include <coax/queue.h>
 #include <coax/ringbuf.h>
 #include <coax/stack.h>
