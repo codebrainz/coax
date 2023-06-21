@@ -23,6 +23,7 @@ set(coax-lib-headers
   include/coax/md5.h
   include/coax/pair.h
   include/coax/queue.h
+  include/coax/ringbuf.h
   include/coax/stack.h
   include/coax/str.h
   include/coax/strfuncs.h
@@ -40,6 +41,7 @@ add_library(coax-lib
   lib/md5.c
   lib/pair.c
   lib/queue.c
+  lib/ringbuf.c
   lib/stack.c
   lib/str.c
   lib/strfuncs.c
