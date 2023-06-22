@@ -32,6 +32,9 @@ cx_str_t *cx_str_new_str(const char *s);
 cx_str_t *cx_str_new_str_len(const char *s, long long int len);
 void cx_str_free(cx_str_t *str);
 
+int cx_str_copy(const cx_str_t *src, cx_str_t *dst);
+cx_str_t *cx_str_dup(const cx_str_t *src);
+
 int cx_str_reserve(cx_str_t *str, size_t reserve);
 int cx_str_compact(cx_str_t *str);
 int cx_str_clear(cx_str_t *str);

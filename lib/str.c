@@ -3,6 +3,7 @@
 #include <coax/str.h>
 #include <coax/strfuncs.h>
 
+#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -91,6 +92,48 @@ void cx_str_free(cx_str_t *str)
     return;
   cx_str_cleanup(str);
   cx_free(str);
+}
+
+int cx_str_copy(const cx_str_t *src, cx_str_t *dst)
+{
+  CX_CHECK_ARG(src);
+  CX_CHECK_ARG(dst);
+
+  if (cx_str_init_full(dst, src->size) != 0)
+    return -1;
+
+  if (cx_str_assign_len(dst, src->data, src->size) != 0)
+    goto failure_exit;
+
+  return 0;
+
+failure_exit:
+  do
+  {
+    int e = errno;
+    cx_str_cleanup(dst);
+    errno = e;
+    return -1;
+  } while (0);
+}
+
+cx_str_t *cx_str_dup(const cx_str_t *src)
+{
+  CX_CHECK_ARG_RET_VAL(src, NULL);
+
+  cx_str_t *dst = cx_new(cx_str_t);
+  if (dst == NULL)
+    return NULL;
+
+  if (cx_str_copy(src, dst) != 0)
+  {
+    int e = errno;
+    cx_free(dst);
+    errno = e;
+    dst = NULL;
+  }
+
+  return dst;
 }
 
 int cx_str_reserve(cx_str_t *str, size_t reserve)

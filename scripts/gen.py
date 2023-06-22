@@ -33,6 +33,9 @@ def find_std_includes(code, as_hdrs):
         fn = match.group("file")
         if fn.startswith("coax"):
             continue
+        # FIXME: this is a hack, fix it
+        elif fn == "unistd.h" or fn == "windows.h":
+            continue
         if as_hdrs:
             std_headers_included_hdr.add(fn)
         else:
@@ -85,7 +88,9 @@ def generate_code(ident):
     code += "\n"
     code += f"#endif // {ident_up}HEADER_INCLUDED\n"
     code += "\n"
-    code += f"#ifdef {ident_up}IMPLMENTATION\n"
+    code += f"#if defined({ident_up}IMPLMENTATION) && !defined({ident_up}IMPLEMENTATION_INCLUDED)\n"
+    code += "\n"
+    code += f"#define {ident_up}IMPLEMENTATION_INCLUDED 1\n"
     code += "\n"
     code += "%%std_headers_src%%\n"
     code += "\n"
